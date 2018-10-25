@@ -1,9 +1,10 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -26,6 +27,8 @@ public class Main extends Application {
     Image image7 = new Image("mario7.jpg");
     Image image8 = new Image("mario8.jpg");
     ArrayList<Image> arrayImage = new ArrayList<>();
+    ArrayList<Image> arrayImageConfirm = new ArrayList<>();
+    ArrayList<ImageView> arrayImageView = new ArrayList<>();
 
     public static void main(String[] args) {
         launch(args);
@@ -46,6 +49,15 @@ public class Main extends Application {
         arrayImage.add(image6);
         arrayImage.add(image7);
         arrayImage.add(image8);
+        arrayImageConfirm.add(image0);
+        arrayImageConfirm.add(image1);
+        arrayImageConfirm.add(image2);
+        arrayImageConfirm.add(image3);
+        arrayImageConfirm.add(image4);
+        arrayImageConfirm.add(image5);
+        arrayImageConfirm.add(image6);
+        arrayImageConfirm.add(image7);
+        arrayImageConfirm.add(image8);
 
         melanger();
 
@@ -76,6 +88,20 @@ public class Main extends Application {
         ImageView imageView8 = new ImageView(arrayImage.get(8));
         imageView8.setFitHeight(300);
         imageView8.setFitWidth(300);
+
+        arrayImageView.add(imageView0);
+        arrayImageView.add(imageView1);
+        arrayImageView.add(imageView2);
+        arrayImageView.add(imageView3);
+        arrayImageView.add(imageView4);
+        arrayImageView.add(imageView5);
+        arrayImageView.add(imageView6);
+        arrayImageView.add(imageView7);
+        arrayImageView.add(imageView8);
+
+        for (int i=0;i<arrayImageView.size();i++){
+            dragDrop(arrayImageView.get(i));
+        }
 
         HBox hBoxH = new HBox(imageView0,imageView1,imageView2);
         hBoxH.setSpacing(5);
@@ -108,10 +134,51 @@ public class Main extends Application {
             }
         });
 
+
         primaryStage.setScene(scene);
         primaryStage.show();
     }
     public void melanger(){
         Collections.shuffle(arrayImage);
+    }
+    public void dragDrop(ImageView source){
+        source.setOnDragDetected(event -> {
+            Image image = source.getImage();
+            Dragboard dragboard = source.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent contenu = new ClipboardContent();
+            contenu.putImage(image);
+            dragboard.setContent(contenu);
+        });
+        source.setOnDragOver(event -> {
+            event.acceptTransferModes(TransferMode.MOVE);
+        });
+        source.setOnDragDone(event -> {
+            boolean ok = true;
+            ArrayList<Image> temp = new ArrayList<>();
+            for (int i=0;i<arrayImageConfirm.size();i++){
+                temp.add(arrayImageView.get(i).getImage());
+            }
+            for (int i=0;i<temp.size();i++){
+                if (temp.get(i).equals(arrayImageConfirm.get(i))){
+                    ok=false;
+                    System.out.println("false "+i);
+                }
+            }
+            if (ok){
+                Alert alerte = new Alert(Alert.AlertType.CONFIRMATION);
+                alerte.setTitle("Félicitation!");
+                alerte.setHeaderText("Tu as complété le casse-tête!");
+                alerte.setContentText("appuie sur ok pour ok");
+                ButtonType resultat = alerte.showAndWait().get();
+                if (resultat == ButtonType.OK){
+                    melanger();
+                }
+            }
+        });
+        source.setOnDragDropped(event -> {
+            ((ImageView)event.getGestureSource()).setImage(source.getImage());
+            source.setImage(event.getDragboard().getImage());
+            event.setDropCompleted(true);
+        });
     }
 }
